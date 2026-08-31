@@ -1,0 +1,10 @@
+/target
+/.build-target
+
+# Build/package artefacts
+*.streamDeckPlugin
+/build/
+
+# Generado por build-linux.sh / build-windows.bat / release.yml
+# Se construye desde assets/ en tiempo de empaquetado
+/opencode-info.sdPlugin/
