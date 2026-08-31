@@ -54,9 +54,9 @@
       "Version": null
     }
   ],
-  "CodePath": "opencode-info",
-  "CodePathWin": "opencode-info.exe",
-  "CodePathLin": "opencode-info",
+  "CodePath": "opencode-info-x86_64-unknown-linux-gnu",
+  "CodePathWin": "opencode-info-x86_64-pc-windows-msvc.exe",
+  "CodePathLin": "opencode-info-x86_64-unknown-linux-gnu",
   "CodePaths": {
     "x86_64-pc-windows-msvc": "opencode-info-x86_64-pc-windows-msvc.exe",
     "x86_64-unknown-linux-gnu": "opencode-info-x86_64-unknown-linux-gnu"

@@ -14,10 +14,9 @@ echo "==> Assembling plugin directory from assets/..."
 rm -rf "$OUT"
 cp -r "$ASSETS" "$OUT"
 
-echo "==> Copying binaries..."
+echo "==> Copying binary..."
 BIN="$TARGET_DIR/release/opencode-info"
 cp "$BIN" "$OUT/opencode-info-$TARGET"
-cp "$BIN" "$OUT/opencode-info"
 
 echo "==> Packaging streamDeckPlugin..."
 rm -f opencode-info.streamDeckPlugin
