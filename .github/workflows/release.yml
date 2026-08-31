@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build (Linux x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .build-target
+      - name: Build release
+        run: |
+          CARGO_TARGET_DIR=.build-target cargo build --release --target x86_64-unknown-linux-gnu
+      - name: Assemble plugin directory
+        run: |
+          rm -rf opencode-info.sdPlugin
+          cp -r assets opencode-info.sdPlugin
+          cp .build-target/x86_64-unknown-linux-gnu/release/opencode-info \
+             opencode-info.sdPlugin/opencode-info-x86_64-unknown-linux-gnu
+          cp .build-target/x86_64-unknown-linux-gnu/release/opencode-info \
+             opencode-info.sdPlugin/opencode-info
+          chmod +x opencode-info.sdPlugin/opencode-info-*
+      - name: Upload plugin dir
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-linux
+          path: opencode-info.sdPlugin/
+
+  build-windows:
+    name: Build (Windows x86_64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .build-target
+      - name: Build release
+        shell: bash
+        run: |
+          CARGO_TARGET_DIR=.build-target cargo build --release --target x86_64-pc-windows-msvc
+      - name: Assemble plugin directory
+        shell: bash
+        run: |
+          rm -rf opencode-info.sdPlugin
+          cp -r assets opencode-info.sdPlugin
+          cp .build-target/x86_64-pc-windows-msvc/release/opencode-info.exe \
+             opencode-info.sdPlugin/opencode-info-x86_64-pc-windows-msvc.exe
+          cp .build-target/x86_64-pc-windows-msvc/release/opencode-info.exe \
+             opencode-info.sdPlugin/opencode-info.exe
+      - name: Upload plugin dir
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-windows
+          path: opencode-info.sdPlugin/
+
+  release:
+    name: Package and publish release
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-windows]
+    steps:
+      - name: Download plugin dirs
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: false
+
+      - name: Merge into single bundle
+        run: |
+          rm -rf bundle
+          mkdir bundle
+          cp -r dist/plugin-linux opencode-info.sdPlugin
+          cp dist/plugin-windows/opencode-info-x86_64-pc-windows-msvc.exe opencode-info.sdPlugin/
+          cp dist/plugin-windows/opencode-info.exe opencode-info.sdPlugin/
+          mv opencode-info.sdPlugin bundle/
+          find bundle -type f | sort
+
+      - name: Create dist zip
+        run: |
+          python3 - <<'PY'
+          import zipfile, os
+          name = "bundle/opencode-info.sdPlugin"
+          out = "com.dahrkael.opencodeinfo.sdPlugin.zip"
+          with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+              for root, _dirs, files in os.walk(name):
+                  for f in files:
+                      p = os.path.join(root, f)
+                      z.write(p, os.path.join(name, os.path.relpath(p, name)))
+          PY
+          echo "== Zip contents =="
+          python3 -c "import zipfile; [print(' ',n) for n in zipfile.ZipFile('com.dahrkael.opencodeinfo.sdPlugin.zip').namelist()]"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: com.dahrkael.opencodeinfo.sdPlugin.zip
+          generate_release_notes: true
