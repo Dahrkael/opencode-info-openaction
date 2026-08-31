@@ -1,0 +1,64 @@
+{
+  "Name": "OpenCode Info",
+  "Author": "Dahrkael",
+  "Version": "0.1.0",
+  "Icon": "icon",
+  "Category": "Monitors",
+  "Description": "Shows OpenCode usage information.",
+  "PropertyInspectorPath": "pi/pisettings.html",
+  "Actions": [
+    {
+      "Name": "Go Usage (single window)",
+      "UUID": "com.dahrkael.opencodeinfo.window",
+      "Tooltip": "Shows the used percentage of one OpenCode Go window (5h, week or month).",
+      "Icon": "actions/window",
+      "States": [
+        {
+          "Image": "actionDefaultImage",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "Go Usage (rotate)",
+      "UUID": "com.dahrkael.opencodeinfo.rotate",
+      "Tooltip": "Cycles between the 5h, weekly and monthly OpenCode Go windows on each press.",
+      "Icon": "actions/rotate",
+      "States": [
+        {
+          "Image": "actionDefaultImage",
+          "ShowTitle": false
+        }
+      ]
+    },
+    {
+      "Name": "Go Usage (summary)",
+      "UUID": "com.dahrkael.opencodeinfo.summary",
+      "Tooltip": "Shows all three OpenCode Go windows (5h, week, month) at once.",
+      "Icon": "actions/summary",
+      "States": [
+        {
+          "Image": "actionDefaultImage",
+          "ShowTitle": false
+        }
+      ]
+    }
+  ],
+  "OS": [
+    {
+      "Platform": "windows",
+      "Version": "10"
+    },
+    {
+      "Platform": "linux",
+      "Version": null
+    }
+  ],
+  "CodePath": "opencode-info",
+  "CodePathWin": "opencode-info.exe",
+  "CodePathLin": "opencode-info",
+  "CodePaths": {
+    "x86_64-pc-windows-msvc": "opencode-info-x86_64-pc-windows-msvc.exe",
+    "x86_64-unknown-linux-gnu": "opencode-info-x86_64-unknown-linux-gnu"
+  }
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<script>
+			let settings = { api_key: "", window: "5h", refresh_seconds: 300, font_color: "#FFFFFF", threshold_yellow: 50, threshold_red: 90 };
+			let actionUuid = "";
+
+			function connectOpenActionSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+				const websocket = new WebSocket("ws://localhost:" + inPort);
+				inActionInfo = JSON.parse(inActionInfo);
+				actionUuid = inActionInfo.action;
+
+				// Show the window selector only for the single-window action.
+				document.getElementById("window-row").style.display = actionUuid === "com.dahrkael.opencodeinfo.window" ? "" : "none";
+
+				websocket.onopen = () => {
+					websocket.send(JSON.stringify({
+						event: inRegisterEvent,
+						uuid: inPropertyInspectorUUID,
+					}));
+				};
+
+				websocket.onmessage = (event) => {
+					const data = JSON.parse(event.data);
+					if (data.event === "didReceiveSettings") {
+						settings = Object.assign({}, settings, data.payload.settings);
+						applyToForm();
+					}
+				};
+
+				// Seed fields from the action's initial settings.
+				settings = Object.assign({}, settings, inActionInfo.payload.settings || {});
+				applyToForm();
+
+				// Set listeners AFTER seeding so we don't clobber the initial values.
+				document.getElementById("api_key").oninput = () => { settings.api_key = document.getElementById("api_key").value; save(); };
+				document.getElementById("window").onchange = () => { settings.window = document.getElementById("window").value; save(); };
+				document.getElementById("refresh_seconds").onchange = () => { settings.refresh_seconds = parseInt(document.getElementById("refresh_seconds").value) || 300; save(); };
+				document.getElementById("font_color").onchange = () => { settings.font_color = document.getElementById("font_color").value; save(); };
+				document.getElementById("threshold_yellow").onchange = () => { settings.threshold_yellow = parseInt(document.getElementById("threshold_yellow").value) || 50; save(); };
+				document.getElementById("threshold_red").onchange = () => { settings.threshold_red = parseInt(document.getElementById("threshold_red").value) || 90; save(); };
+
+				window.save = () => {
+					websocket.send(JSON.stringify({
+						event: "setSettings",
+						context: inActionInfo.context,
+						payload: settings,
+					}));
+				};
+			}
+
+			const connectElgatoStreamDeckSocket = connectOpenActionSocket;
+
+			function applyToForm() {
+				document.getElementById("api_key").value = settings.api_key ?? "";
+				document.getElementById("window").value = settings.window ?? "5h";
+				document.getElementById("refresh_seconds").value = settings.refresh_seconds ?? 300;
+				const fc = settings.font_color || "#FFFFFF";
+				document.getElementById("font_color").value = /^#[0-9a-fA-F]{6}$/.test(fc) ? fc : "#FFFFFF";
+				document.getElementById("threshold_yellow").value = settings.threshold_yellow ?? 50;
+				document.getElementById("threshold_red").value = settings.threshold_red ?? 90;
+			}
+		</script>
+
+		<style>
+			* {
+				font-family: system-ui, sans-serif;
+				font-size: 15px;
+				color: oklch(92.2% 0 0);
+				box-sizing: border-box;
+			}
+			body {
+				margin: 14px;
+				background-color: oklch(26.9% 0 0);
+			}
+			.row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 12px;
+				gap: 10px;
+			}
+			label {
+				flex: 0 0 auto;
+				color: oklch(78% 0 0);
+			}
+			input[type="text"], input[type="number"], select {
+				flex: 1;
+				min-width: 0;
+				padding: 6px;
+				background-color: oklch(37.1% 0 0);
+				border: 1px solid oklch(43.9% 0 0);
+				border-radius: 8px;
+			}
+			input[type="color"] {
+				width: 48px;
+				height: 30px;
+				padding: 2px;
+				background-color: oklch(37.1% 0 0);
+				border: 1px solid oklch(43.9% 0 0);
+				border-radius: 8px;
+			}
+			.hint {
+				color: oklch(65% 0 0);
+				font-size: 12px;
+				margin: -4px 0 12px 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="row">
+			<label for="api_key">API key</label>
+			<input id="api_key" type="text" placeholder="sk-..." spellcheck="false" />
+		</div>
+		<div class="hint">OpenCode Go API key (from your account).</div>
+
+		<div class="row" id="window-row">
+			<label for="window">Window</label>
+			<select id="window">
+				<option value="5h">5 hours</option>
+				<option value="week">Week</option>
+				<option value="month">Month</option>
+			</select>
+		</div>
+
+		<div class="row">
+			<label for="refresh_seconds">Refresh (s)</label>
+			<input id="refresh_seconds" type="number" min="15" />
+		</div>
+
+		<div class="row">
+			<label for="font_color">Text color</label>
+			<input id="font_color" type="color" />
+		</div>
+
+		<div class="row">
+			<label for="threshold_yellow">Yellow ≥</label>
+			<input id="threshold_yellow" type="number" min="1" max="100" />
+		</div>
+
+		<div class="row">
+			<label for="threshold_red">Red ≥</label>
+			<input id="threshold_red" type="number" min="1" max="100" />
+		</div>
+	</body>
+</html>
