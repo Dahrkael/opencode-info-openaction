@@ -21,7 +21,7 @@ The plugin queries your OpenCode Go account and renders your usage on a key as a
 ## Requirements
 
 - An [OpenAction](https://openaction.amankhanna.me/) server such as [OpenDeck](https://github.com/nekename/OpenDeck) running on **Windows** or **Linux** (x86_64).
-- An OpenCode Go API key from your OpenCode account, entered once in the plugin's settings.
+- An OpenCode Go API key from your OpenCode account.
 
 ## Installation
 
