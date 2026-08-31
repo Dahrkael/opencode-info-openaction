@@ -1,4 +1,4 @@
-# ?? OpenCode Info
+# OpenCode Info
 
 <img src="assets/icon.svg" height="36" alt="OpenCode Info icon" align="left">
 
